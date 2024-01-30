@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atrapa la Pelota Extrema</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+   body {
+    background: url('icar.jpg') center center fixed;
+    background-size: cover;
+    color: #ecf0f1;
+    font-family: 'Arial', sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #2c3e50; /* Color de fondo en caso de que la imagen no se cargue o no esté disponible */
+}
+
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 30px;
+            color: #e74c3c;
+            text-shadow: 2px 2px 4px #34495e;
+        }
+
+        #pelota {
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background-color: #e74c3c;
+            position: absolute;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #mensajeResultado {
+            font-size: 24px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin-top: 30px;
+            text-shadow: 2px 2px 4px #34495e;
+        }
+
+        #tiempoRestante {
+            font-size: 36px;
+            margin-top: 20px;
+            color: #ecf0f1;
+            text-shadow: 2px 2px 4px #34495e;
+        }
+
+        #reiniciarJuego {
+            margin-top: 30px;
+            padding: 15px 30px;
+            font-size: 24px;
+            background-color: #3498db;
+            color: #ecf0f1;
+            border: none;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        #reiniciarJuego:hover {
+            background-color: #2980b9;
+        }
+    </style>
+</head>
+
+<body>
+  <iframe data-aa='2299103' src='//ad.a-ads.com/2299103?size=728x90' style='width:728px; height:90px; border:0px; padding:0; overflow:hidden; background-color: transparent;'></iframe>
+    <div class="container text-center mt-5">
+        <h1>Atrapa la Pelota Extrema</h1>
+        <div id="pelota"></div>
+        <div id="mensajeResultado" class="mt-3"></div>
+        <div id="tiempoRestante"></div>
+        <button id="reiniciarJuego" class="btn btn-primary mt-3">Reiniciar Juego</button>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const pelota = document.getElementById('pelota');
+            const mensajeResultado = document.getElementById('mensajeResultado');
+            const tiempoRestanteElement = document.getElementById('tiempoRestante');
+            const reiniciarJuegoBtn = document.getElementById('reiniciarJuego');
+
+            let atrapada = false;
+            let tiempoRestante = 50;
+            let movimientoEnProgreso = false;
+            let cuentaRegresiva;
+
+            function obtenerMensajeAtrapador() {
+                const mensajes = [
+                    '¡Felicidades! Eres un maestro atrapando la pelota.',
+                    'Increíble, tienes reflejos de gato.',
+                    'Eres una leyenda en este juego, ¡sigue así!',
+                    'Eres un crack, ¡sigue así!',
+                    'Wuao que mente maestra eres, ¡excelente!',
+                    'Eres un mito, ¡claro ejemplo de agilidad!',
+                    '¡Tienes pareja!',
+                    'Eres un tigre, ¡una fiera!'
+                ];
+                return mensajes[Math.floor(Math.random() * mensajes.length)];
+            }
+
+            function obtenerComentarioPerdedor() {
+                const comentariosNegativos = [
+                    'Vaya, parece que la pelota te ganó esta vez.',
+                    'No te preocupes Donlento, ¡inténtalo de nuevo!',
+                    'Tu tiempo de reacción puede mejorar dejando el juego, ¡sigue practicando inútil!',
+                    'Deberías irte, eres demasiado relento',
+                    'No lo lograrás, ¡inténtalo de nuevo para que pierdas!',
+                    '¿Será que te puedes ir de aquí?',
+                    'Vaya, vaya, ¿soy muy rápido para tus ojitos?',
+                    'Dedícate a otra cosa'
+                ];
+                return comentariosNegativos[Math.floor(Math.random() * comentariosNegativos.length)];
+            }
+
+            function reiniciarJuego() {
+                pelota.style.display = 'block';
+                mensajeResultado.innerHTML = '';
+                atrapada = false;
+                tiempoRestante = 50;
+                actualizarTiempoRestante();
+
+                clearInterval(cuentaRegresiva);
+                cuentaRegresiva = setInterval(actualizarTiempo, 1000);
+
+                if (!movimientoEnProgreso) {
+                    movimientoEnProgreso = true;
+                    moverPelota();
+                }
+            }
+
+            function actualizarTiempo() {
+                tiempoRestante--;
+                actualizarTiempoRestante();
+
+                if (tiempoRestante <= 0) {
+                    detenerJuego(false); // Llamar a detenerJuego con argumento false para indicar pérdida
+                }
+            }
+
+            function actualizarTiempoRestante() {
+                tiempoRestanteElement.innerText = `Tiempo restante: ${tiempoRestante} segundos`;
+            }
+
+            function moverPelota() {
+                const anchoVentana = window.innerWidth - 70;
+                const altoVentana = window.innerHeight - 70;
+
+                const mover = () => {
+                    if (!atrapada && tiempoRestante > 0) {
+                        const posX = Math.floor(Math.random() * anchoVentana);
+                        const posY = Math.floor(Math.random() * altoVentana);
+
+                        pelota.style.left = `${posX}px`;
+                        pelota.style.top = `${posY}px`;
+
+                        actualizarTiempoRestante();
+                        setTimeout(mover, 300);
+                    } else {
+                        detenerJuego(atrapada); // Llamar a detenerJuego con el estado de atrapada
+                    }
+                };
+
+                actualizarTiempoRestante();
+                setTimeout(mover, 300);
+            }
+
+            function detenerJuego(atrapada) {
+                clearInterval(cuentaRegresiva);
+                movimientoEnProgreso = false;
+
+                if (atrapada && tiempoRestante > 0) {
+                    mensajeResultado.innerHTML = obtenerMensajeAtrapador();
+                } else {
+                    mensajeResultado.innerHTML = obtenerComentarioPerdedor();
+                }
+            }
+
+            const clickHandler = () => {
+                if (!atrapada && tiempoRestante > 0) {
+                    atrapada = true;
+                    detenerJuego(atrapada);
+                }
+            };
+
+            pelota.addEventListener('click', clickHandler);
+            pelota.addEventListener('touchstart', clickHandler);
+
+            reiniciarJuegoBtn.addEventListener('click', reiniciarJuego);
+
+            cuentaRegresiva = setInterval(actualizarTiempo, 1000);
+            moverPelota();
+        });
+    </script>
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
